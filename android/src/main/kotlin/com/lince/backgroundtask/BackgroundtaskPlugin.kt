@@ -1,45 +1,52 @@
 package com.lince.backgroundtask
 
+import android.content.Context
+import android.os.Build
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
-import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
+import java.time.Duration
+import java.util.concurrent.TimeUnit
 
 /** BackgroundtaskPlugin */
-public class BackgroundtaskPlugin: FlutterPlugin, MethodCallHandler {
-  override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "backgroundtask")
-    channel.setMethodCallHandler(BackgroundtaskPlugin());
-  }
+open class BackgroundtaskPlugin : FlutterPlugin {
+    private val channel = "lince.com/backgroundtask"
+    private val method = "periodic"
 
-  // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-  // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-  // plugin registration via this function while apps migrate to use the new Android APIs
-  // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-  //
-  // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-  // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-  // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-  // in the same class.
-  companion object {
-    @JvmStatic
-    fun registerWith(registrar: Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "backgroundtask")
-      channel.setMethodCallHandler(BackgroundtaskPlugin())
+    override fun onAttachedToEngine(
+            @NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        val channel = MethodChannel(flutterPluginBinding.binaryMessenger, channel)
+        channel.setMethodCallHandler { call, result ->
+            if (call.method == method) {
+                startService(flutterPluginBinding.applicationContext)
+                result.success(null)
+            }
+        }
     }
-  }
-
-  override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+  
+    private fun startService(context: Context) {
+        println("startService")
+        try{
+            val constrains = Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+    
+            val pWorkRequest = PeriodicWorkRequest
+                    .Builder(CustomWorker::class.java, 15, TimeUnit.MINUTES)
+                    .setConstraints(constrains)
+                    .build()
+    
+            WorkManager.getInstance(context).enqueue(pWorkRequest)
+        } catch (e: Exception) {
+            println(e)
+        }
     }
-  }
 
-  override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-  }
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    }
 }

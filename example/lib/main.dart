@@ -24,15 +24,20 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    Backgroundtask.androidVersion();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
       body: Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator()
       ),
     );
   }
 }
-
-
