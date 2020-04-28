@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
-void main() => runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Backgroundtask.periodic(callback: taskEmail);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -23,11 +27,6 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
-  @override
-  void initState() {
-    super.initState();
-    Backgroundtask.periodic(callback: taskEmail);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,21 +37,24 @@ class _MyPageState extends State<MyPage> {
   }
 }
 
-void taskEmail() async {
+Future<void> taskEmail() async {
+  print('executing task');
+  
   final String username = 'flutter.background@gmail.com';
   final String password = '@123456789!';
+  print('user $username and pass $password');
 
-  final SmtpServer smtpServer = gmail(username, password);
+//  final SmtpServer smtpServer = gmail(username, password);
 
-  final Message message = Message()
-    ..from = Address(username, 'Background Test')
-    ..recipients.add('carlos.hjunior@lince.com.br')
-    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
-    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
-  
-  try {
-    await send(message, smtpServer);
-  } catch (e, _) {
-    print('erro >> $e');
-  }
+//  final Message message = Message()
+//    ..from = Address(username, 'Background Test')
+//    ..recipients.add('carlos.hjunior@lince.com.br')
+//    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
+//    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
+
+//  try {
+//    await send(message, smtpServer);
+//  } catch (e, _) {
+//    print('erro >> $e');
+//  }
 }

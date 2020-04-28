@@ -4,9 +4,13 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull;
 import androidx.work.*
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.view.FlutterCallbackInformation
+import io.flutter.view.FlutterMain
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
@@ -41,7 +45,7 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
         return try {
             val data = Data.Builder()
             data.putLong("handle", param.getLong(0))
-
+            
             val constrains = Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build()
@@ -53,10 +57,40 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
                     .build()
 
             WorkManager.getInstance(context).enqueue(pWorkRequest)
+            
             true
         } catch (e: Exception) {
             println(e)
             false
+        }
+    }
+
+    private fun startDartTask(context: Context, handle: Long) {
+        try {
+            val flutterEngine = FlutterEngine(context)
+            val flutterCallback = FlutterCallbackInformation.lookupCallbackInformation(handle)
+            if (flutterCallback.callbackName == null) {
+                Log.e("periodic", "callback not found")
+                return
+            }
+
+            val assets = context.assets
+            Log.d("periodic", "assets")
+
+            val bundle = FlutterMain.findAppBundlePath()
+            Log.d("periodic", "bundle")
+
+            val executor = flutterEngine.dartExecutor
+            Log.d("periodic", "exec")
+
+            val dartCallback = DartExecutor.DartCallback(assets, bundle, flutterCallback)
+            Log.d("periodic", "callback")
+
+            executor.executeDartCallback(dartCallback)
+            Log.d("periodic", "fim")
+
+        } catch (e: Exception) {
+            Log.e("periodic", "erro desconhecido >> $e")
         }
     }
 
