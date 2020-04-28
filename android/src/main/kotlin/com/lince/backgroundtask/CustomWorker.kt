@@ -13,7 +13,7 @@ class CustomWorker(
 ) : Worker(context, workerParameters) {
     
     override fun doWork(): Result {
-        val url = URL("http://10.0.11.68:3000/moeda/get")
+        val url = URL("http://192.168.1.4:3000/")
         with(url.openConnection() as HttpURLConnection) {
             requestMethod = "GET"
             StrictMode.setThreadPolicy(
@@ -24,6 +24,7 @@ class CustomWorker(
             )
             
             println(responseCode)
+            println(responseMessage)
         }
         
         return Result.success()

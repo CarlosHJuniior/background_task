@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getAndroidId', () async {
-    expect(await Backgroundtask.androidVersion, '42');
+    expect(await Backgroundtask.periodicTask, '42');
   });
 }

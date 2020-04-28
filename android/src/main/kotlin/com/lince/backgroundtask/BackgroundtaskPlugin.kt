@@ -21,10 +21,13 @@ open class BackgroundtaskPlugin : FlutterPlugin {
     override fun onAttachedToEngine(
             @NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         val channel = MethodChannel(flutterPluginBinding.binaryMessenger, channel)
+        
         channel.setMethodCallHandler { call, result ->
             if (call.method == method) {
-                startService(flutterPluginBinding.applicationContext)
-                result.success(null)
+                println("kotlin foi chamado")
+                channel.invokeMethod("kotlin_chamando", null)
+//                startService(flutterPluginBinding.applicationContext)
+//                result.success(null)
             }
         }
     }

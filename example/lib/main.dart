@@ -28,7 +28,7 @@ class _MyPageState extends State<MyPage> {
   @override
   void initState() {
     super.initState();
-    Backgroundtask.androidVersion();
+    Backgroundtask.periodicTask();
   }
 
   @override
@@ -40,4 +40,9 @@ class _MyPageState extends State<MyPage> {
       ),
     );
   }
+}
+
+void task() {
+  print('este metodo sera executado periodicamente');
+  print('');
 }
