@@ -1,12 +1,15 @@
-import 'package:android_alarm_manager/android_alarm_manager.dart';
 import 'package:backgroundtask/backgroundtask.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Backgroundtask.periodic(callback: taskEmail);
+  
+  await Backgroundtask.periodic(
+    callback: taskEmail,
+  );
   runApp(MyApp());
 }
 
@@ -44,17 +47,18 @@ Future<void> taskEmail() async {
   final String password = '@123456789!';
   print('user $username and pass $password');
 
-  final SmtpServer smtpServer = gmail(username, password);
-
-  final Message message = Message()
-    ..from = Address(username, 'Background Test')
-    ..recipients.add('alemaob7@gmail.com')
-    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
-    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
-
-  try {
-    await send(message, smtpServer);
-  } catch (e, _) {
-    print('erro >> $e');
-  }
+//  final SmtpServer smtpServer = gmail(username, password);
+//
+//  final Message message = Message()
+//    ..from = Address(username, 'Background Test')
+//    ..recipients.add('carlos.hjunior@lince.com.br')
+//    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
+//    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
+//
+//  try {
+//    await send(message, smtpServer);
+//  } catch (e, _) {
+//    print('erro >> $e');
+//  }
+  print('end task');
 }

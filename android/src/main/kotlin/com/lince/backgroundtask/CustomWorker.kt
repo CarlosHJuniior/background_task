@@ -7,13 +7,9 @@ import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.FlutterJNI
 import io.flutter.embedding.engine.dart.DartExecutor
-import io.flutter.embedding.engine.loader.FlutterLoader
-import io.flutter.embedding.engine.systemchannels.LifecycleChannel
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
-import kotlin.coroutines.coroutineContext
 
 class CustomWorker(
         context: Context,

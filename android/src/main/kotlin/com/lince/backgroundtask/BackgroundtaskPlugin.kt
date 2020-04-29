@@ -2,17 +2,11 @@ package com.lince.backgroundtask
 
 import android.content.Context
 import android.util.Log
-import androidx.annotation.NonNull;
+import androidx.annotation.NonNull
 import androidx.work.*
-import io.flutter.embedding.engine.FlutterEngine
-import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.view.FlutterCallbackInformation
-import io.flutter.view.FlutterMain
-import org.json.JSONArray
-import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /** BackgroundtaskPlugin */
@@ -33,7 +27,9 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
                 val array = ArrayList<Any?>()
                 array.addAll(call.arguments())
 
-                result.success(startService(JSONArray(array)))
+                val config = WorkerConfiguration(array[1] as Map<String, Any>)
+                
+                result.success(startService(array[0] as Long, config))
             } catch (e: Exception) {
                 Log.d("periodic", "erro ao executar o serviço >> $e")
                 result.success(false)
@@ -41,23 +37,20 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
         }
     }
 
-    private fun startService(param: JSONArray): Boolean {
+    private fun startService(handle: Long, config: WorkerConfiguration): Boolean {
         return try {
             val data = Data.Builder()
-            data.putLong("handle", param.getLong(0))
-            
-            val constrains = Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
-                    .build()
+            data.putLong("handle", handle)
 
             val pWorkRequest = PeriodicWorkRequest
-                    .Builder(CustomWorker::class.java, 15, TimeUnit.MINUTES)
-                    .setInputData(data.build())
-                    .setConstraints(constrains)
-                    .build()
+                .Builder(CustomWorker::class.java, config.interval.toLong(), TimeUnit.SECONDS)
+                .setInitialDelay(10, TimeUnit.SECONDS)
+                .setInputData(data.build())
+                .setConstraints(config.buildConstraints())
+                .build()
 
             WorkManager.getInstance(context).enqueue(pWorkRequest)
-            
+
             true
         } catch (e: Exception) {
             println(e)
@@ -65,35 +58,41 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
         }
     }
 
-    private fun startDartTask(context: Context, handle: Long) {
-        try {
-            val flutterEngine = FlutterEngine(context)
-            val flutterCallback = FlutterCallbackInformation.lookupCallbackInformation(handle)
-            if (flutterCallback.callbackName == null) {
-                Log.e("periodic", "callback not found")
-                return
-            }
+    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+    }
+}
 
-            val assets = context.assets
-            Log.d("periodic", "assets")
+data class WorkerConfiguration(val map: Map<String, Any>) {
+    val interval: Number = map["interval"] as Number
+    private var constraints: Set<Int>? = null
+    private var networkType: String? = null
 
-            val bundle = FlutterMain.findAppBundlePath()
-            Log.d("periodic", "bundle")
-
-            val executor = flutterEngine.dartExecutor
-            Log.d("periodic", "exec")
-
-            val dartCallback = DartExecutor.DartCallback(assets, bundle, flutterCallback)
-            Log.d("periodic", "callback")
-
-            executor.executeDartCallback(dartCallback)
-            Log.d("periodic", "fim")
-
-        } catch (e: Exception) {
-            Log.e("periodic", "erro desconhecido >> $e")
+    init {
+        val list = map["constraints"]
+        if (list != null) {
+            constraints = (list as List<Int>).toHashSet()
+        }
+        
+        val network = map["networkType"]
+        if (network != null) {
+            networkType = (network as String).replace("NetworkType.", "") 
         }
     }
+    
+    fun buildConstraints(): Constraints {
+        val builder = Constraints.Builder()
 
-    override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        if (constraints != null) {
+            builder.setRequiresBatteryNotLow(constraints!!.contains(0))
+                .setRequiresCharging(constraints!!.contains(1))
+                .setRequiresDeviceIdle(constraints!!.contains(2))
+                .setRequiresStorageNotLow(constraints!!.contains(3))
+        }
+        
+        if (networkType != null) {
+            builder.setRequiredNetworkType(NetworkType.valueOf(networkType!!))
+        }
+        
+        return builder.build()
     }
 }
