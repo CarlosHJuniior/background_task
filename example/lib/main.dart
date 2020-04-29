@@ -44,17 +44,17 @@ Future<void> taskEmail() async {
   final String password = '@123456789!';
   print('user $username and pass $password');
 
-//  final SmtpServer smtpServer = gmail(username, password);
+  final SmtpServer smtpServer = gmail(username, password);
 
-//  final Message message = Message()
-//    ..from = Address(username, 'Background Test')
-//    ..recipients.add('carlos.hjunior@lince.com.br')
-//    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
-//    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
+  final Message message = Message()
+    ..from = Address(username, 'Background Test')
+    ..recipients.add('alemaob7@gmail.com')
+    ..subject = 'Test Dart Mailer library :: 😀 :: ${DateTime.now()}'
+    ..text = 'This is the plain text.\nThis is line 2 of the text part.';
 
-//  try {
-//    await send(message, smtpServer);
-//  } catch (e, _) {
-//    print('erro >> $e');
-//  }
+  try {
+    await send(message, smtpServer);
+  } catch (e, _) {
+    print('erro >> $e');
+  }
 }

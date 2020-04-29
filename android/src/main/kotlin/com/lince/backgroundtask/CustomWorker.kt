@@ -10,6 +10,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterJNI
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.loader.FlutterLoader
+import io.flutter.embedding.engine.systemchannels.LifecycleChannel
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
 import kotlin.coroutines.coroutineContext
@@ -22,7 +23,7 @@ class CustomWorker(
     override fun doWork(): Result {
         Handler(Looper.getMainLooper()).post {
             Log.d("periodic", "background service start")
-//
+
             val handle = inputData.getLong("handle", 0)
             startDartTask(applicationContext, handle)
             Log.d("periodic", "background service end")
@@ -41,19 +42,11 @@ class CustomWorker(
             }
             
             val assets = context.assets
-            Log.d("periodic", "assets")
-
             val bundle = FlutterMain.findAppBundlePath()
-            Log.d("periodic", "bundle")
-            
             val executor = flutterEngine.dartExecutor
-            Log.d("periodic", "exec")
-            
             val dartCallback = DartExecutor.DartCallback(assets, bundle, flutterCallback)
-            Log.d("periodic", "callback")
             
             executor.executeDartCallback(dartCallback)
-            Log.d("periodic", "fim")
 
         } catch (e: Exception) {
             Log.e("periodic", "erro desconhecido >> $e")
