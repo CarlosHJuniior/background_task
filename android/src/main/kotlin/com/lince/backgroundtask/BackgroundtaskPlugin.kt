@@ -49,6 +49,7 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
                 .setConstraints(config.buildConstraints())
                 .build()
 
+            WorkManager.getInstance(context).cancelAllWork()
             WorkManager.getInstance(context).enqueue(pWorkRequest)
 
             true
