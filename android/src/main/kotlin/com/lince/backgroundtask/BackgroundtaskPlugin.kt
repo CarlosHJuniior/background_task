@@ -7,6 +7,7 @@ import androidx.work.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
 
 /** BackgroundtaskPlugin */
@@ -48,9 +49,10 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
                 .setInputData(data.build())
                 .setConstraints(config.buildConstraints())
                 .build()
-
-            WorkManager.getInstance(context).cancelAllWork()
-            WorkManager.getInstance(context).enqueue(pWorkRequest)
+            
+            WorkManager.getInstance(context).cancelAllWork().result.addListener({
+                WorkManager.getInstance(context).enqueue(pWorkRequest)
+            }, { it.run() })
 
             true
         } catch (e: Exception) {
