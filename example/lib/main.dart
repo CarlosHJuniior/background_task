@@ -1,8 +1,5 @@
 import 'package:backgroundtask/backgroundtask.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
