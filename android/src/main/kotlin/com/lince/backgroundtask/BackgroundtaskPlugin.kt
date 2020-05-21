@@ -52,7 +52,7 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
             
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 "background_tast",
-                ExistingPeriodicWorkPolicy.REPLACE,
+                ExistingPeriodicWorkPolicy.KEEP,
                 pWorkRequest
             )
             
