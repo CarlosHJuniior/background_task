@@ -4,12 +4,15 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.view.FlutterCallbackInformation
 import io.flutter.view.FlutterMain
+import kotlin.math.log
 
 class CustomWorker(
         context: Context,
@@ -17,6 +20,14 @@ class CustomWorker(
 ) : Worker(context, workerParameters) {
 
     override fun doWork(): Result {
+        val workManager =  WorkManager.getInstance(this.applicationContext)
+        val workInfoList = workManager.getWorkInfoById(this.id).get()
+        
+        if (workInfoList.state == WorkInfo.State.CANCELLED) {
+            Log.d("periodic", "cancelado")
+            return Result.success()
+        }
+        
         Handler(Looper.getMainLooper()).post {
             Log.d("periodic", "background service start")
 

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
     private val channel = "lince.com/backgroundtask"
     private val method = "periodic"
-    private val workName = "background_tast"
+    private val workTag = "background_tast"
     private lateinit var context: Context
     
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -46,23 +46,18 @@ open class BackgroundtaskPlugin : FlutterPlugin, MethodChannel.MethodCallHandler
             Log.d("periodic", "startService")
             val workManager = WorkManager.getInstance(context)
             
-            val workInfoList = workManager.getWorkInfosForUniqueWork(workName).get()
-            if (workInfoList.isNotEmpty()) {
-                workManager.cancelWorkById(workInfoList.first().id)
-            }
+            val workInfoList = workManager.getWorkInfosByTag(workTag).get()
+            workInfoList.forEach { wi -> workManager.cancelWorkById(wi.id) }
             
-            val pWorkRequest = PeriodicWorkRequest
+            val pwRequest = PeriodicWorkRequest
                 .Builder(CustomWorker::class.java, config.interval.toLong(), TimeUnit.SECONDS)
                 .setInitialDelay(10, TimeUnit.SECONDS)
                 .setInputData(data.build())
+                .addTag(workTag)
                 .setConstraints(config.buildConstraints())
                 .build()
-    
-            workManager.enqueueUniquePeriodicWork(
-                workName,
-                ExistingPeriodicWorkPolicy.REPLACE,
-                pWorkRequest
-            )
+            
+            workManager.enqueue(pwRequest)
             
             true
         } catch (e: Exception) {
